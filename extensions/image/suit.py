@@ -5,6 +5,8 @@ from aiohttp import ClientSession
 from discord import app_commands
 from discord.ext import commands
 from PIL import Image, ImageChops, ImageDraw
+import os
+from pathlib import Path
 
 import config
 
@@ -12,9 +14,9 @@ import config
 class SuitCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.path = Path(config.PROFILE_PNG_PATH)
     
-    async def create_suit(self, member: discord.Member):
-        image_bytes = await member.display_avatar.read()  # Get the bytes of the member'S avatar
+    def create_suit(self, image_bytes: bytes):
         image = Image.open(BytesIO(image_bytes)).convert("RGBA").resize((1000, 1000))  # Get the avatar image, convert it to the RGBA color format and then resize it to 1000x1000
         template = Image.open("data/suit.png").convert("RGBA")  # Get the template image and convert it to the RGBA color format
 
@@ -29,16 +31,20 @@ class SuitCog(commands.Cog):
         template.save("profile.png")  # Saves the image locally to send it
     
     @app_commands.command(description="Turns the member's into a circle avatar and then adds it onto an image.")
-    @app_commands.checks.cooldown(1, 10)  # This adds a cooldown, because trust me, you don't want people spamming Pillow
+    @app_commands.checks.cooldown(config.COOLDOWN_PER, config.COOLDOWN_LENGTH)  # This adds a cooldown, because trust me, you don't want people spamming Pillow
     async def suit(self, interaction: discord.Interaction, member: discord.Member | None = None, ephemeral: bool | None = None):
         member = member or interaction.user  # Set the member to the member or the author, depends if its specified or not
         ephemeral = ephemeral or False
 
         await interaction.response.defer(thinking=True)  # Defer because Pillow sometimes takes long
 
-        await self.bot.loop.run_in_executor(None, self.create_suit, member)
+        image_bytes = image_bytes = await member.display_avatar.read()  # Get the bytes of the member'S avatar
+        await self.bot.loop.run_in_executor(None, self.create_suit, image_bytes)
 
-        return await interaction.followup.send(file=discord.File("profile.png"), ephemeral=ephemeral)
+        await interaction.followup.send(file=discord.File("profile.png"), ephemeral=ephemeral)
+        
+        if self.path.is_file():
+            self.path.unlink()
 
     @suit.error
     async def error_suit(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
