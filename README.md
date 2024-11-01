@@ -1,12 +1,12 @@
-# ImageBot
+# SuitBot 🤵
 This is the repository of a bot I made for a customer.
-It has a `/suit` command which turns your image into a circle and puts it on a image stored in `data/image.png`
-
-## Syncing Commands
+It has a `/suit` command which turns your image into a circle and puts it on a image stored in `data/image.png`, which is a suit.
+ 
+## Syncing Commands 🔂
 To sync the slash commands command, you must use `?sync`
 Please do not over use this command, it has a daily rate limit.
 
-## Additional Info
+## Additional Info 💁‍♂️
 The `/suit` command has a 10 second cooldown. It will send an error if the cooldown is hit.
 It also has a `member` argument which allows you to generate the suit avatar for the specified user. If no user is specified, it defaults to the author.
 It also has a `ephemeral` argument which sends the response ephemerally meaning only the author can see it.
